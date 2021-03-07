@@ -8,12 +8,12 @@ namespace Collection
 {
     class CustomDictionary<TKey, TValue> : IDictionary<TKey, TValue>
     {
-
         private struct Element
         {
             public int hashCode;
             public TKey key;
             public TValue value;
+            public bool notDeleted; // false = it is deleted, true = is not deleted
         }
         private const int startCount = 8;
         private int currentSize = startCount;
@@ -23,6 +23,32 @@ namespace Collection
 
         public void Add(TKey key, TValue value)
         {
+            // check if null 
+            if (key == null || value == null)
+            {
+                throw new Exception("Keys and values couldn't be null");
+            }
+
+            // find the same key 
+            int index = FindIndex(key);
+            if (index >= 0)
+            {
+                if (!customDictionary[index].notDeleted) // if it is deleted
+                {
+                    customDictionary[index].value = value;
+                    customDictionary[index].notDeleted = true; // not deleted
+                }
+                else
+                {
+                    throw new Exception("Key already exists");
+                }
+            }
+
+            createElement(key, value);
+
+        }
+        private void createElement(TKey key, TValue value)
+        {
             // check if there is some place for new element
             if (currentElement == currentSize)
             {
@@ -30,42 +56,40 @@ namespace Collection
                 currentSize *= 2;
                 Array.Resize(ref customDictionary, currentSize);
             }
+
+            // create new element
             Element e = new Element();
             e.hashCode = key.GetHashCode();
             e.key = key;
             e.value = value;
+            e.notDeleted = true;
             customDictionary[currentElement++] = e;
-
         }
         public void Clear()
         {
             Array.Clear(customDictionary, 0, customDictionary.Length);
             currentElement = 0;
-            currentSize = startCount;
-            Array.Resize(ref customDictionary, currentSize);
-
         }
 
         public bool ContainsKey(TKey key)
         {
-            int hash = key.GetHashCode();
-            foreach (Element el in customDictionary)
+            if (key == null) throw new Exception("Key is null");
+
+            int index = FindIndex(key);
+            if (index >= 0 && customDictionary[index].notDeleted)
             {
-                if (hash == el.hashCode && object.Equals(key, el.key))
-                {
-                    return true;
-                }
+                return true;
             }
             return false;
         }
         private int FindIndex(TKey key)
         {
             int hash = key.GetHashCode();
-            foreach (Element el in customDictionary)
+            for (int i = 0; i < currentElement; i++)
             {
-                if (hash == el.hashCode && object.Equals(key, el.key))
+                if (hash == customDictionary[i].hashCode && object.Equals(key, customDictionary[i].key))
                 {
-                    return Array.IndexOf(customDictionary, el);
+                    return i;
                 }
             }
             return -1;
@@ -73,13 +97,15 @@ namespace Collection
 
         public bool Remove(TKey key)
         {
+            if (key == null) throw new Exception("Key is null");
+
             int index = FindIndex(key);
             if (index >= 0)
             {
-                customDictionary = customDictionary.Where((val, idx) => idx != index).ToArray();
-                currentElement--;
+                customDictionary[index].notDeleted = false;
                 return true;
             }
+            throw new Exception("Key not found");
             return false;
         }
 
@@ -87,58 +113,86 @@ namespace Collection
         {
             get
             {
+                if (key == null) throw new Exception("Key is null");
                 int index = FindIndex(key);
                 if (index >= 0) return customDictionary[index].value;
-                return default(TValue);
+                throw new Exception("Key not found");
             }
-            set {
+            set
+            {
+                if (key == null) throw new Exception("Key is null");
+                else if (value == null) throw new Exception("Value is null");
                 int index = FindIndex(key);
-                if (index >= 0) customDictionary[index].value = value;
+                if (index >= 0)
+                {
+                    customDictionary[index].value = value;
+                    customDictionary[index].notDeleted = true;
+                }
+                else
+                {
+                    createElement(key, value);
+                }
+
             }
         }
 
-        public ICollection<TKey> Keys => getAllKeys();
-        private ICollection<TKey> getAllKeys()
+        public ICollection<TKey> Keys
         {
-            List<TKey> keys = new List<TKey>();
-
-            foreach (Element el in customDictionary)
+            get
             {
-                keys.Add(el.key);
-            }
+                List<TKey> keys = new List<TKey>();
 
-            return keys;
+                foreach (Element el in customDictionary)
+                {
+                    if (el.notDeleted) keys.Add(el.key);
+                }
+
+                return keys;
+            }
         }
-        public ICollection<TValue> Values => getAllValues();
-        private ICollection<TValue> getAllValues()
+        public ICollection<TValue> Values
         {
-            List<TValue> values = new List<TValue>();
-
-            foreach (Element el in customDictionary)
+            get
             {
-                values.Add(el.value);
-            }
+                List<TValue> values = new List<TValue>();
 
-            return values;
+                foreach (Element el in customDictionary)
+                {
+                    if (el.notDeleted) values.Add(el.value);
+                }
+
+                return values;
+            }
         }
 
-        public int Count => currentElement;
+        public int Count {
+            get
+            {
+                int count = 0;
+                for (int i = 0; i < currentElement; i++)
+                {
+                    if (customDictionary[i].notDeleted)
+                    {
+                        count++;
+                    }
+                }
+                return count;
+
+            }
+        }
 
         public bool IsReadOnly => false;
 
         public bool TryGetValue(TKey key, [MaybeNullWhen(false)] out TValue value)
         {
-            int hash = key.GetHashCode();
-            foreach (Element el in customDictionary)
+            if (key == null) throw new Exception("Key is null");
+            int index = FindIndex(key);
+            if (index >= 0 && customDictionary[index].notDeleted)
             {
-                if (hash == el.hashCode && object.Equals(key, el.key))
-                {
-                    value = el.value;
-                    return true;
-                }
+                value = customDictionary[index].value;
+                return true;
             }
-            value = default(TValue);
-            return false;
+            throw new Exception("Key not found");
         }
 
         // not ready
