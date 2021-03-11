@@ -13,30 +13,30 @@ namespace Collection
             public int hashCode;
             public TKey key;
             public TValue value;
-            public bool notDeleted; // false = it is deleted, true = is not deleted
+            public bool isActive; 
         }
         private const int startCount = 8;
         private int currentSize = startCount;
-        private int currentElement = 0;
+        private int lastElement = 0;
         private Element[] customDictionary = new Element[startCount];
 
 
         public void Add(TKey key, TValue value)
         {
             // check if null 
-            if (key == null || value == null)
+            if (key == null)
             {
-                throw new Exception("Keys and values couldn't be null");
+                throw new Exception("Keys couldn't be null");
             }
 
             // find the same key 
             int index = FindIndex(key);
             if (index >= 0)
             {
-                if (!customDictionary[index].notDeleted) // if it is deleted
+                if (!customDictionary[index].isActive) 
                 {
                     customDictionary[index].value = value;
-                    customDictionary[index].notDeleted = true; // not deleted
+                    customDictionary[index].isActive = true; 
                 }
                 else
                 {
@@ -50,7 +50,7 @@ namespace Collection
         private void createElement(TKey key, TValue value)
         {
             // check if there is some place for new element
-            if (currentElement == currentSize)
+            if (lastElement == currentSize)
             {
                 // increase size
                 currentSize *= 2;
@@ -62,13 +62,13 @@ namespace Collection
             e.hashCode = key.GetHashCode();
             e.key = key;
             e.value = value;
-            e.notDeleted = true;
-            customDictionary[currentElement++] = e;
+            e.isActive = true;
+            customDictionary[lastElement++] = e;
         }
         public void Clear()
         {
             Array.Clear(customDictionary, 0, customDictionary.Length);
-            currentElement = 0;
+            lastElement = 0;
         }
 
         public bool ContainsKey(TKey key)
@@ -76,7 +76,7 @@ namespace Collection
             if (key == null) throw new Exception("Key is null");
 
             int index = FindIndex(key);
-            if (index >= 0 && customDictionary[index].notDeleted)
+            if (index >= 0 && customDictionary[index].isActive)
             {
                 return true;
             }
@@ -85,7 +85,7 @@ namespace Collection
         private int FindIndex(TKey key)
         {
             int hash = key.GetHashCode();
-            for (int i = 0; i < currentElement; i++)
+            for (int i = 0; i < lastElement; i++)
             {
                 if (hash == customDictionary[i].hashCode && object.Equals(key, customDictionary[i].key))
                 {
@@ -102,11 +102,10 @@ namespace Collection
             int index = FindIndex(key);
             if (index >= 0)
             {
-                customDictionary[index].notDeleted = false;
+                customDictionary[index].isActive = false;
                 return true;
             }
             throw new Exception("Key not found");
-            return false;
         }
 
         public TValue this[TKey key]
@@ -121,12 +120,11 @@ namespace Collection
             set
             {
                 if (key == null) throw new Exception("Key is null");
-                else if (value == null) throw new Exception("Value is null");
                 int index = FindIndex(key);
                 if (index >= 0)
                 {
                     customDictionary[index].value = value;
-                    customDictionary[index].notDeleted = true;
+                    customDictionary[index].isActive = true;
                 }
                 else
                 {
@@ -144,7 +142,7 @@ namespace Collection
 
                 foreach (Element el in customDictionary)
                 {
-                    if (el.notDeleted) keys.Add(el.key);
+                    if (el.isActive) keys.Add(el.key);
                 }
 
                 return keys;
@@ -158,7 +156,7 @@ namespace Collection
 
                 foreach (Element el in customDictionary)
                 {
-                    if (el.notDeleted) values.Add(el.value);
+                    if (el.isActive) values.Add(el.value);
                 }
 
                 return values;
@@ -169,9 +167,9 @@ namespace Collection
             get
             {
                 int count = 0;
-                for (int i = 0; i < currentElement; i++)
+                for (int i = 0; i < lastElement; i++)
                 {
-                    if (customDictionary[i].notDeleted)
+                    if (customDictionary[i].isActive)
                     {
                         count++;
                     }
@@ -187,7 +185,7 @@ namespace Collection
         {
             if (key == null) throw new Exception("Key is null");
             int index = FindIndex(key);
-            if (index >= 0 && customDictionary[index].notDeleted)
+            if (index >= 0 && customDictionary[index].isActive)
             {
                 value = customDictionary[index].value;
                 return true;

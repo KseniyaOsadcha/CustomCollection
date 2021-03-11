@@ -6,12 +6,12 @@ using System.Linq;
 namespace CollectionTests
 {
     [TestClass]
-    public class UnitTest1
+    public class CustomDictionaryTest
     {
 
         // testing add method
         [TestMethod]
-        public void addValues()
+        public void AddValues()
         {
             CustomDictionary<string, string> dict = new CustomDictionary<string, string>();
             dict.Add("Spain", "Madrid");
@@ -19,14 +19,14 @@ namespace CollectionTests
 
         [TestMethod]
         [ExpectedException(typeof(Exception), "Key already exists")]
-        public void addValueWhenKeyIsAlreadyExists()
+        public void AddValueWhenKeyIsAlreadyExists()
         {
             CustomDictionary<string, string> dict = new CustomDictionary<string, string>();
             dict.Add("Spain", "Madrid");
             dict.Add("Spain", "Madrid");
         }
         [TestMethod]
-        public void addValueWhenKeyIsAlreadyExistsButWasDeleted()
+        public void AddValueWhenKeyIsAlreadyExistsButWasDeleted()
         {
             CustomDictionary<string, string> dict = new CustomDictionary<string, string>();
             dict.Add("Spain", "Madrid");
@@ -34,8 +34,8 @@ namespace CollectionTests
             dict.Add("Spain", "Madrid");
         }
         [TestMethod]
-        [ExpectedException(typeof(Exception), "Keys and values couldn't be null")]
-        public void addNulls()
+        [ExpectedException(typeof(Exception), "Keys couldn't be null")]
+        public void AddNulls()
         {
             CustomDictionary<string, string> dict = new CustomDictionary<string, string>();
             dict.Add(null, null);
@@ -44,7 +44,7 @@ namespace CollectionTests
 
         //Test Clear method
         [TestMethod]
-        public void clearingDictionary_checkUsingCountMethod()
+        public void AlearingDictionary_checkUsingCountMethod()
         {
             CustomDictionary<string, string> dict = new CustomDictionary<string, string>();
             dict.Add("Spain", "Madrid");
@@ -56,7 +56,7 @@ namespace CollectionTests
 
         [TestMethod]
         [ExpectedException(typeof(Exception), "Key not found")]
-        public void clearingDictionary_checkUsingTryGetValue()
+        public void ClearingDictionary_checkUsingTryGetValue()
         {
             CustomDictionary<string, string> dict = new CustomDictionary<string, string>();
             dict.Add("Spain", "Madrid");
@@ -66,7 +66,7 @@ namespace CollectionTests
         }
         [TestMethod]
         [ExpectedException(typeof(Exception), "Key not found")]
-        public void clearingDictionary_checkUsingGetValueByKey()
+        public void ClearingDictionary_checkUsingGetValueByKey()
         {
             CustomDictionary<string, string> dict = new CustomDictionary<string, string>();
             dict.Add("Spain", "Madrid");
@@ -86,7 +86,7 @@ namespace CollectionTests
         }
 
         [TestMethod]
-        public void checkContainsExistingKey()
+        public void CheckContainsExistingKey()
         {
             CustomDictionary<string, string> dict = new CustomDictionary<string, string>();
             dict.Add("Spain", "Madrid");
@@ -95,7 +95,7 @@ namespace CollectionTests
             Assert.AreEqual(dict.ContainsKey("Georgia"), true);
         }
         [TestMethod]
-        public void checkContainsNotExistingKey()
+        public void CheckContainsNotExistingKey()
         {
             CustomDictionary<string, string> dict = new CustomDictionary<string, string>();
             Assert.AreEqual(dict.ContainsKey("Georgia"), false);
@@ -132,7 +132,7 @@ namespace CollectionTests
         //get
 
         [TestMethod]
-        public void getValueByExistingKey()
+        public void GetValueByExistingKey()
         {
             CustomDictionary<string, string> dict = new CustomDictionary<string, string>();
             dict.Add("Spain", "Madrid");
@@ -142,7 +142,7 @@ namespace CollectionTests
         }
         [TestMethod]
         [ExpectedException(typeof(Exception), "Key not found")]
-        public void getValueByNotExistingKey()
+        public void GetValueByNotExistingKey()
         {
             CustomDictionary<string, string> dict = new CustomDictionary<string, string>();
             string val = dict["Spain"];
@@ -150,7 +150,7 @@ namespace CollectionTests
 
         [TestMethod]
         [ExpectedException(typeof(Exception), "Key is null")]
-        public void getValueByNullKey()
+        public void GetValueByNullKey()
         {
             CustomDictionary<string, string> dict = new CustomDictionary<string, string>();
             string val = dict[null];
@@ -159,7 +159,7 @@ namespace CollectionTests
         //set
 
         [TestMethod]
-        public void setValueBySomeKey()
+        public void SetValueBySomeKey()
         {
             CustomDictionary<string, string> dict = new CustomDictionary<string, string>();
             dict["Spain"] = "Madrid";
@@ -169,21 +169,22 @@ namespace CollectionTests
         }
         [TestMethod]
         [ExpectedException(typeof(Exception), "Key is null")]
-        public void setValueByNullKey()
+        public void SetValueByNullKey()
         {
             CustomDictionary<string, string> dict = new CustomDictionary<string, string>();
             dict[null] = "Madrid";
         }
         [TestMethod]
-        [ExpectedException(typeof(Exception), "Value is null")]
-        public void setNullValueBySomeKey()
+        public void SetNullValueBySomeKey()
         {
             CustomDictionary<string, string> dict = new CustomDictionary<string, string>();
             dict["Spain"] = null;
+            Assert.AreEqual(dict["Spain"], null);
+
         }
 
         [TestMethod]
-        public void setValueWhenKeyIsAlreadyExists()
+        public void SetValueWhenKeyIsAlreadyExists()
         {
             CustomDictionary<string, string> dict = new CustomDictionary<string, string>();
             dict.Add("Spain", "Madrid");
@@ -194,7 +195,7 @@ namespace CollectionTests
 
         // testing getting keys
         [TestMethod]
-        public void getAllKeys_checkingByKeysCount()
+        public void GetAllKeys_checkingByKeysCount()
         {
             CustomDictionary<string, string> dict = new CustomDictionary<string, string>();
             Assert.AreEqual(dict.Keys.Count, 0);
@@ -215,7 +216,7 @@ namespace CollectionTests
 
 
         [TestMethod]
-        public void getAllKeys_checkingByKeysNames()
+        public void GetAllKeys_checkingByKeysNames()
         {
             CustomDictionary<string, string> dict = new CustomDictionary<string, string>();
             dict.Add("Spain", "Madrid");
@@ -228,7 +229,7 @@ namespace CollectionTests
 
         // testing getting values
         [TestMethod]
-        public void getAllValues_checkingByValuesCount()
+        public void GetAllValues_checkingByValuesCount()
         {
             CustomDictionary<string, string> dict = new CustomDictionary<string, string>();
             Assert.AreEqual(dict.Values.Count, 0);
@@ -250,7 +251,7 @@ namespace CollectionTests
         }
 
         [TestMethod]
-        public void getAllValues_checkingByValuesNames()
+        public void GetAllValues_checkingByValuesNames()
         {
             CustomDictionary<string, string> dict = new CustomDictionary<string, string>();
             dict.Add("Spain", "Madrid");
@@ -263,7 +264,7 @@ namespace CollectionTests
 
         //testing getting count
         [TestMethod]
-        public void getCount()
+        public void GetCount()
         {
             CustomDictionary<string, string> dict = new CustomDictionary<string, string>();
             Assert.AreEqual(dict.Values.Count, 0);
